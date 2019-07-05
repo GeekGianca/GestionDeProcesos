@@ -5,11 +5,18 @@
  */
 package com.example.gestorprocesos;
 
+import com.example.gestorprocesos.conexion.ProcesoImpl;
 import com.example.gestorprocesos.hilos.HiloProcesos;
+import com.example.gestorprocesos.modelo.Proceso;
 import com.example.gestorprocesos.modelo.ProcesoGestionado;
 import com.example.gestorprocesos.rest.ProcesosRest;
 import java.awt.HeadlessException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -29,6 +36,8 @@ public class VistaProcesos extends javax.swing.JFrame {
     HiloProcesos hilo;
     boolean reaunudar = false;
     boolean termino = false;
+    int cantidadProcesos = 0;
+    ProcesoImpl pimpl;
 
     /**
      * Creates new form VistaProcesos
@@ -88,6 +97,9 @@ public class VistaProcesos extends javax.swing.JFrame {
         noProceso = new javax.swing.JLabel();
         mostrarGrafica = new javax.swing.JButton();
         limpiar = new javax.swing.JButton();
+        cProcesosTxt = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        btnCrearProcesos = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -219,6 +231,16 @@ public class VistaProcesos extends javax.swing.JFrame {
             }
         });
 
+        jLabel4.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel4.setText("Cantidad de procesos:");
+
+        btnCrearProcesos.setText("Crear");
+        btnCrearProcesos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCrearProcesosActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -228,18 +250,26 @@ public class VistaProcesos extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(progresoBarra, javax.swing.GroupLayout.PREFERRED_SIZE, 441, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(cProcesosTxt))
                                 .addGap(18, 18, 18)
+                                .addComponent(btnCrearProcesos)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnDescargar, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(progresoBarra, javax.swing.GroupLayout.PREFERRED_SIZE, 441, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(procentajeProgreso)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(noProceso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnIniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnDescargar, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(jLabel2)))
                         .addGap(39, 39, 39)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -263,11 +293,17 @@ public class VistaProcesos extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnDescargar)
-                    .addComponent(tiempoHilo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(tiempoHilo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cProcesosTxt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btnCrearProcesos)
+                        .addComponent(btnDescargar)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
@@ -433,6 +469,60 @@ public class VistaProcesos extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_mostrarGraficaActionPerformed
 
+    private void btnCrearProcesosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearProcesosActionPerformed
+        pimpl = new ProcesoImpl();
+        if (!cProcesosTxt.getText().isEmpty()) {
+            try{
+                cantidadProcesos = Integer.parseInt(cProcesosTxt.getText());
+            }catch(Exception e){
+                cantidadProcesos = 0;
+            }
+            int cantidad = cantidadProcesos;
+        List<String> tokens = new ArrayList<>();
+        try {
+            int cont = 0;
+            int canti = 0;
+            String str_proceso = null;
+            String admin
+                    = System.getenv("windir") + "\\system32\\" + "tasklist.exe /v";
+            Process proceso = Runtime.getRuntime().exec(admin);
+            BufferedReader input = new BufferedReader(
+                    new InputStreamReader(proceso.getInputStream()));
+            while ((str_proceso = input.readLine()) != null) {
+                if (canti < cantidad) {
+                    com.example.gestorprocesos.conexion.Proceso pro = new com.example.gestorprocesos.conexion.Proceso();
+                    //System.out.println(str_proceso);
+                    if (cont >= 4) {
+                        String token = str_proceso.replace(" ", ".");
+                        //System.out.println(token);
+                        StringTokenizer tokenizer = new StringTokenizer(token, ".");
+                        while (tokenizer.hasMoreTokens()) {
+                            tokens.add(tokenizer.nextToken());
+                            System.out.println(tokens.size());
+                            if (tokens.size() == 10) {
+                                pro = new com.example.gestorprocesos.conexion.Proceso(Integer.parseInt(tokens.get(1)), tokens.get(0), tokens.get(7), tokens.get(9), (tokens.get(9).length() < 10) ? 1 : 0);
+                                pimpl.insert(pro);
+                                tokens.clear();
+                            }
+                        }
+                    }
+                    cont++;
+                }
+                canti++;
+            }
+            input.close();
+            cProcesosTxt.setText("");
+            cProcesosTxt.setEditable(false);
+            this.btnCrearProcesos.setEnabled(false);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        }else{
+            JOptionPane.showMessageDialog(this, "No tienes datos de cantidad", "Sin Cantidad", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnCrearProcesosActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -469,12 +559,15 @@ public class VistaProcesos extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCrearProcesos;
     private javax.swing.JButton btnDescargar;
     private javax.swing.JButton btnDetener;
     private javax.swing.JButton btnIniciar;
+    private javax.swing.JTextField cProcesosTxt;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
